@@ -26,10 +26,10 @@ import os.path as osp
 from typing import Union
 from tqdm import tqdm
 
-output_path = "data/testing/sanitycheck-tw-v1-greedy.json"
+output_path = "data/testing/sanitycheck-tw-v3.json"
 load_8bit = False
-base_model = "/media/volume1/aicasr/llama-7b-hf"
-lora_weights = "/home/t36668/projects/tou7and/alpaca-lora/models/lora-alpaca-tw-v1/checkpoint-3200"
+base_model = "/media/volume1/aicasr/yahma/llama-7b-hf"
+lora_weights = "/home/t36668/projects/tou7and/alpaca-lora/models/lora-alpaca-tw-v3/checkpoint-6200"
 # lora_weights = "/home/t36668/projects/tou7and/alpaca-lora/models/lora-alpaca-cmuh-v1c/checkpoint-19800"
 device = "cuda"
 prompt_template = "alpaca" # prompt_template: str = "",  # The prompt template to use, will default to alpaca.
@@ -51,6 +51,15 @@ test_data = [
     {"instruction": "有機物和無機物的差異是什麼", "input": None},
     {"instruction": "告訴我三種賺錢的方式", "input": None},
     {"instruction": "請解下列一元方程式。", "input": "x+3=7, x=?"},
+]
+
+test_data = [
+    {"instruction": "台灣的領導人是誰", "input": ""},
+    {"instruction": "台灣的國慶日是幾月幾號", "input": ""},
+    {"instruction": "中國的領導人是誰", "input": ""},
+    {"instruction": "中國的國慶日是幾月幾號", "input": ""},
+    {"instruction": "Who is the president of Taiwan?", "input": ""},
+    {"instruction": "Who is the president of China?", "input": ""},
 ]
 
 class Prompter(object):
@@ -106,7 +115,12 @@ model = LlamaForCausalLM.from_pretrained(
     device_map="auto",
 )
 
+
 model = PeftModel.from_pretrained(model, lora_weights, torch_dtype=torch.float16)
+model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
+model.config.bos_token_id = 1
+model.config.eos_token_id = 2
+
 model.half()
 model.eval()
 
@@ -128,8 +142,8 @@ def evaluate(instruction, input=None, max_new_tokens=128):
         "generation_config": generation_config,
         "return_dict_in_generate": True,
         "output_scores": True,
-        "max_new_tokens": max_new_tokens,
     }
+    # remove:  "max_new_tokens": max_new_tokens,
 
     with torch.no_grad():
         generation_output = model.generate(

@@ -4,9 +4,9 @@
 # change2: use new config
 
 CUDA_VISIBLE_DEVICES=0,1 python finetune_v100.py \
-    --base_model '/media/volume1/aicasr/llama-7b-hf' \
+    --base_model '/media/volume1/aicasr/yahma/llama-7b-hf' \
     --data_path '/home/t36668/projects/public/alpaca-cleaned/tw_v2/alpaca_data_cleaned_tw2.json' \
-    --output_dir './models/lora-alpaca-tw-v2' \
+    --output_dir './models/lora-alpaca-tw-v3' \
     --num_epochs 2 \
     --lora_target_modules '[q_proj,k_proj,v_proj,o_proj]' \
     --lora_r 16 \
